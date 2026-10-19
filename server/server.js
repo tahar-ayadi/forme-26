@@ -139,6 +139,32 @@ app.put("/vetements/:id", async (req, res) => {
   return res.status(200).json(data);
 });
 
+app.delete("/vetements/:id", async (req, res) => {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(404).json({ error: "Vêtement introuvable." });
+  }
+
+  const { data, error } = await supabase
+    .from("vetements")
+    .delete()
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error("Erreur Supabase :", error.message);
+    return res.status(500).json({ error: "Impossible de supprimer le vêtement." });
+  }
+
+  if (!data) {
+    return res.status(404).json({ error: "Vêtement introuvable." });
+  }
+
+  return res.status(204).send();
+});
+
 app.listen(PORT, () => {
   console.log(`API FORME 26 démarrée sur http://localhost:${PORT}`);
 });
