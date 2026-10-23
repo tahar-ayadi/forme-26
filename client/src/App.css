@@ -1,7 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap");
 
 /* =========================================
-   FORME 26 — PREMIUM STREETWEAR
-   Palette : sauge, noir, ivoire
+   MAISON TRAAC — BASE VISUELLE
 ========================================= */
 
 :root {
@@ -14,6 +14,13 @@
   --gris: #777970;
   --bordure: #dedfd7;
   --transition: 0.25s ease;
+  font-family: "DM Sans", Arial, Helvetica, sans-serif;
+  color: var(--noir);
+  background: var(--ivoire);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -21,20 +28,24 @@
 }
 
 html {
+  min-width: 320px;
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
   background: var(--ivoire);
   color: var(--noir);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
 }
 
-button,
-input {
-  font: inherit;
+body, button, input {
+  font-family: "DM Sans", Arial, Helvetica, sans-serif;
+}
+
+button, input {
+  font-size: inherit;
 }
 
 button {
@@ -53,6 +64,11 @@ button:disabled {
   cursor: not-allowed;
 }
 
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
 main {
   width: 100%;
   max-width: 1520px;
@@ -61,6 +77,14 @@ main {
   border-left: 1px solid var(--bordure);
   border-right: 1px solid var(--bordure);
   background: var(--ivoire);
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
 }
 
 /* =========================================
@@ -74,10 +98,10 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 30px;
+  gap: 26px;
   min-height: 100px;
   padding: 20px 6.5%;
-  background: rgba(245, 244, 239, 0.96);
+  background: rgba(245, 244, 239, 0.97);
   border-bottom: 1px solid var(--bordure);
   backdrop-filter: blur(14px);
 }
@@ -90,49 +114,79 @@ main {
   font-size: clamp(25px, 2.4vw, 36px);
   font-weight: 900;
   letter-spacing: -2px;
+  line-height: 1;
   text-decoration: none;
   white-space: nowrap;
 }
 
-.logo span {
+/* Logo Maison TRAAC : aucune boîte noire, toutes les lettres visibles */
+.logo.logo-maison {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: var(--noir);
-  color: var(--vert);
-  letter-spacing: -2px;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  gap: 7px;
+  white-space: nowrap;
+  text-decoration: none;
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-size: clamp(23px, 2.4vw, 34px);
+  font-weight: 800;
+  letter-spacing: -1.7px;
+  line-height: 1;
+}
+
+.logo.logo-maison .logo-maison-texte {
+  display: inline;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  color: var(--noir);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.logo.logo-maison .logo-traac {
+  display: inline;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  color: var(--vert-fonce);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.logo.logo-maison:hover {
+  opacity: 0.82;
 }
 
 .signature {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 3px;
+  letter-spacing: 2.5px;
   text-align: center;
+  white-space: nowrap;
 }
 
 .navigation {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
 }
 
 .navigation button {
   position: relative;
-  padding: 15px 19px;
+  padding: 14px 17px;
   background: transparent;
   color: var(--noir);
   border: 1px solid transparent;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    background var(--transition),
-    color var(--transition),
-    border-color var(--transition);
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 
 .navigation button:hover {
@@ -148,7 +202,7 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 9px;
   background: var(--vert);
   color: var(--noir);
   border-color: var(--vert);
@@ -228,8 +282,9 @@ main {
   max-width: 1150px;
   margin: 12px 0 25px;
   color: var(--ivoire);
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
   font-size: clamp(48px, 7.5vw, 106px);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 0.99;
   letter-spacing: -5px;
 }
@@ -242,7 +297,7 @@ main {
 }
 
 /* =========================================
-   COLLECTION
+   COLLECTION / CARTES PRODUITS
 ========================================= */
 
 .collection {
@@ -261,8 +316,9 @@ main {
 
 .titre-collection h2 {
   margin: 0;
+  font-family: "Space Grotesk", sans-serif;
   font-size: clamp(30px, 4vw, 46px);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -2px;
 }
 
@@ -333,13 +389,6 @@ main {
   padding: 19px 0 0;
 }
 
-.infos-carte h3 {
-  margin: 5px 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
 .categorie {
   margin: 0;
   color: var(--gris);
@@ -347,16 +396,18 @@ main {
   letter-spacing: 0.5px;
 }
 
+.infos-carte h3 {
+  margin: 5px 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
 .prix {
   flex-shrink: 0;
   margin: 5px 0 0;
   font-size: 16px;
   font-weight: 800;
-}
-
-.carte .bouton-ajouter {
-  width: 100%;
-  margin-top: 18px;
 }
 
 .message-vide {
@@ -378,10 +429,7 @@ main {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    background var(--transition),
-    color var(--transition),
-    border-color var(--transition);
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 
 .bouton-ajouter:hover:not(:disabled) {
@@ -393,6 +441,11 @@ main {
 .bouton-ajouter:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.carte .bouton-ajouter {
+  width: 100%;
+  margin-top: 18px;
 }
 
 .bouton-secondaire,
@@ -478,7 +531,6 @@ main {
   color: var(--noir);
   border: 1px solid var(--bordure);
   border-radius: 0;
-  outline-offset: 2px;
 }
 
 .formulaire input:focus {
@@ -543,7 +595,7 @@ main {
 }
 
 /* =========================================
-   PANIER : FOND ET PANNEAU
+   PANIER
 ========================================= */
 
 .fond-panier {
@@ -577,23 +629,13 @@ main {
 }
 
 @keyframes entree-panier {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 @keyframes fondu-panier {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .entete-panier {
@@ -643,8 +685,6 @@ main {
   color: var(--blanc);
 }
 
-/* ARTICLES DU PANIER */
-
 .contenu-panier {
   flex: 1;
   min-height: 0;
@@ -683,6 +723,16 @@ main {
 .details-panier .categorie {
   margin-bottom: 12px;
   line-height: 1.5;
+}
+
+.taille-dans-panier {
+  margin: 0 0 10px;
+  color: #65675f;
+  font-size: 12px;
+}
+
+.taille-dans-panier strong {
+  color: var(--noir);
 }
 
 .prix-panier {
@@ -733,8 +783,6 @@ main {
 .supprimer-panier:hover {
   color: #9b3434;
 }
-
-/* BAS DU PANIER */
 
 .bas-panier {
   flex-shrink: 0;
@@ -795,8 +843,6 @@ main {
   cursor: pointer;
 }
 
-/* PANIER VIDE */
-
 .panier-vide {
   display: flex;
   flex: 1;
@@ -832,7 +878,306 @@ main {
 }
 
 /* =========================================
-   CHARGEMENT ET ERREURS
+   APERÇU PRODUIT
+========================================= */
+
+.image-produit-cliquable,
+.nom-produit-cliquable {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.image-produit-cliquable .cadre-image {
+  position: relative;
+}
+
+.etiquette-apercu {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 10px 13px;
+  background: var(--ivoire);
+  color: var(--noir);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: 0.25s ease;
+}
+
+.carte:hover .etiquette-apercu {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nom-produit-cliquable h3 {
+  margin: 6px 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.nom-produit-cliquable:hover h3 {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.fond-apercu {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+  overflow-y: auto;
+  background: rgba(15, 17, 14, 0.68);
+  backdrop-filter: blur(5px);
+  animation: fondu-panier 0.2s ease;
+}
+
+.fenetre-apercu {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  width: min(920px, 100%);
+  max-height: min(760px, 92vh);
+  overflow-y: auto;
+  background: var(--ivoire);
+  color: var(--noir);
+  box-shadow: 0 25px 90px rgba(0, 0, 0, 0.25);
+  animation: entree-apercu 0.25s ease-out;
+}
+
+@keyframes entree-apercu {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fermer-apercu {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: var(--ivoire);
+  color: var(--noir);
+  border: 1px solid var(--bordure);
+  font-size: 28px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.fermer-apercu:hover {
+  background: var(--noir);
+  color: var(--blanc);
+}
+
+.apercu-image {
+  position: relative;
+  min-height: 480px;
+  background: #e8e8e0;
+}
+
+.apercu-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  object-fit: cover;
+}
+
+.apercu-informations {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 48px 36px 35px;
+}
+
+.apercu-informations > .surtitre {
+  margin: 0 0 16px;
+  color: var(--vert-fonce);
+  font-size: 11px;
+  letter-spacing: 2px;
+  line-height: 1.6;
+}
+
+.apercu-informations h2 {
+  margin: 0;
+  padding-right: 15px;
+  font-size: clamp(27px, 3vw, 39px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+}
+
+.prix-apercu {
+  margin: 17px 0 25px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.description-produit {
+  padding: 20px 0;
+  border-top: 1px solid var(--bordure);
+  border-bottom: 1px solid var(--bordure);
+}
+
+.description-produit h3,
+.choix-tailles h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.description-produit p {
+  margin: 10px 0 0;
+  color: #65675f;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.choix-tailles {
+  margin-top: 25px;
+}
+
+.titre-tailles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+
+.titre-tailles span {
+  color: #65675f;
+  font-size: 11px;
+}
+
+.grille-tailles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.grille-tailles button {
+  min-width: 0;
+  min-height: 45px;
+  padding: 8px 4px;
+  background: transparent;
+  color: var(--noir);
+  border: 1px solid #d1d2c9;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.grille-tailles button:hover {
+  border-color: var(--vert-fonce);
+}
+
+.grille-tailles button.taille-selectionnee {
+  background: var(--noir);
+  color: var(--blanc);
+  border-color: var(--noir);
+  box-shadow: inset 0 -3px 0 var(--vert);
+}
+
+.message-produit {
+  margin: 14px 0 0;
+  color: #9b3434;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.bouton-ajouter-apercu {
+  width: 100%;
+  min-height: 54px;
+  margin-top: 23px;
+}
+
+.taille-dans-panier {
+  margin: 0 0 10px;
+  color: #65675f;
+  font-size: 12px;
+}
+
+.taille-dans-panier strong {
+  color: var(--noir);
+}
+
+/* =========================================
+   FOOTER — MAISON TRAAC
+========================================= */
+
+.footer-signature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 17px;
+  padding: 55px 20px 32px;
+  background: var(--noir);
+  color: var(--ivoire);
+  text-align: center;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ivoire);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -1.2px;
+}
+
+.footer-logo strong {
+  color: var(--vert);
+  font-weight: 900;
+}
+
+.footer-slogan {
+  margin: 0;
+  color: var(--vert);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.signature-tahar {
+  margin-top: 14px;
+  color: var(--vert);
+  font-size: 12px;
+  letter-spacing: 4px;
+}
+
+.signature-tahar strong {
+  color: var(--ivoire);
+  font-weight: 900;
+}
+
+.footer-signature .copyright {
+  margin-top: 12px;
+  color: #85877f;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+/* =========================================
+   ÉTATS / MESSAGES
 ========================================= */
 
 .message-page {
@@ -850,7 +1195,7 @@ main {
 }
 
 /* =========================================
-   RESPONSIVE : TABLETTES
+   RESPONSIVE TABLETTES
 ========================================= */
 
 @media (max-width: 1000px) {
@@ -859,9 +1204,15 @@ main {
     padding: 18px 4%;
   }
 
+  .logo.logo-maison {
+    font-size: clamp(21px, 2.6vw, 28px);
+    letter-spacing: -1.3px;
+    gap: 5px;
+  }
+
   .signature {
-    font-size: 11px;
-    letter-spacing: 2px;
+    font-size: 10px;
+    letter-spacing: 1.7px;
   }
 
   .navigation {
@@ -869,8 +1220,8 @@ main {
   }
 
   .navigation button {
-    padding: 13px 12px;
-    font-size: 14px;
+    padding: 13px 11px;
+    font-size: 13px;
   }
 
   .introduction {
@@ -896,7 +1247,7 @@ main {
 }
 
 /* =========================================
-   RESPONSIVE : MOBILES
+   RESPONSIVE MOBILES
 ========================================= */
 
 @media (max-width: 650px) {
@@ -908,14 +1259,10 @@ main {
     padding: 18px 5%;
   }
 
-  .logo {
-    font-size: 26px;
-  }
-
-  .logo span {
-    width: 36px;
-    height: 36px;
-    font-size: 23px;
+  .logo.logo-maison {
+    font-size: clamp(21px, 5.5vw, 27px);
+    letter-spacing: -1.2px;
+    gap: 5px;
   }
 
   .signature {
@@ -986,7 +1333,8 @@ main {
     padding-top: 13px;
   }
 
-  .infos-carte h3 {
+  .infos-carte h3,
+  .nom-produit-cliquable h3 {
     font-size: 15px;
   }
 
@@ -1065,10 +1413,76 @@ main {
   .ligne-total strong {
     font-size: 21px;
   }
+
+  .fond-apercu {
+    align-items: flex-start;
+    padding: 15px;
+  }
+
+  .fenetre-apercu {
+    grid-template-columns: 1fr;
+    width: min(460px, 100%);
+    max-height: 94vh;
+    max-height: 94dvh;
+    margin: auto;
+  }
+
+  .apercu-image {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .apercu-image img {
+    min-height: 0;
+    height: 100%;
+    aspect-ratio: 4 / 3;
+  }
+
+  .apercu-informations {
+    padding: 25px 22px;
+  }
+
+  .apercu-informations h2 {
+    font-size: 29px;
+  }
+
+  .prix-apercu {
+    margin: 12px 0 18px;
+  }
+
+  .description-produit {
+    padding: 16px 0;
+  }
+
+  .choix-tailles {
+    margin-top: 20px;
+  }
+
+  .etiquette-apercu {
+    opacity: 1;
+    transform: none;
+  }
+
+  .footer-signature {
+    padding: 42px 15px 28px;
+  }
+
+  .footer-logo {
+    font-size: 24px;
+  }
+
+  .footer-slogan {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
 }
 
-/* PETITS ÉCRANS */
-@media (max-width: 360px) {
+@media (max-width: 380px) {
+  .logo.logo-maison {
+    font-size: 21px;
+    letter-spacing: -1.3px;
+  }
+
   .navigation button {
     padding: 10px 7px;
     font-size: 12px;
@@ -1081,9 +1495,13 @@ main {
   .introduction h1 {
     font-size: 39px;
   }
+
+  .grille-tailles {
+    gap: 5px;
+  }
 }
 
-/* RESPECT DES PRÉFÉRENCES D'ANIMATION */
+/* Accessibilité : animations réduites à la demande */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
