@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API_URL = "http://localhost:3000/vetements";
+const API_URL = "https://maison-traac.onrender.com/vetements";
 
 const TAILLES = ["XS", "S", "M", "L", "XL"];
 
