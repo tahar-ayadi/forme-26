@@ -687,7 +687,7 @@ function App() {
                       }
                     >
                       {vetement.disponible
-                        ? "Choisir ma taille +"
+                        ? "Choisir ma taille "
                         : "Indisponible"}
                     </button>
                   </article>
