@@ -1511,3 +1511,237 @@ img {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* =========================================
+   BANDEAU ANIMÉ — OFFRE DE BIENVENUE
+========================================= */
+
+.bandeau-bienvenue {
+  position: relative;
+  z-index: 120;
+  overflow: hidden;
+  background: #171916;
+  color: #f5f4ef;
+  border-bottom: 1px solid rgba(168, 184, 154, 0.45);
+}
+
+.bandeau-defilement {
+  display: flex;
+  align-items: center;
+  gap: 27px;
+  width: max-content;
+  min-height: 39px;
+  padding: 0 22px;
+  white-space: nowrap;
+  animation: defilement-traac 28s linear infinite;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+
+.bandeau-defilement span {
+  flex: 0 0 auto;
+}
+
+.bandeau-defilement .bandeau-separateur {
+  color: #a8b89a;
+  font-size: 14px;
+}
+
+.bandeau-bienvenue:hover .bandeau-defilement {
+  animation-play-state: paused;
+}
+
+.bandeau-action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  padding: 4px 18px 4px 42px;
+  background: linear-gradient(90deg, rgba(23, 25, 22, 0), #171916 22%);
+  pointer-events: none;
+}
+
+.bandeau-action > span {
+  color: #f5f4ef;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-align: center;
+}
+
+.bandeau-action button {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  background: #a8b89a;
+  color: #171916;
+  border: 1px solid #a8b89a;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.bandeau-action button:hover {
+  background: #f5f4ef;
+  border-color: #f5f4ef;
+}
+
+/* =========================================
+   APPLICATION DU CODE PROMO DANS LE PANIER
+========================================= */
+
+.formulaire-promo {
+  margin: 0 0 20px;
+}
+
+.formulaire-promo label {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.champ-promo {
+  display: flex;
+  align-items: stretch;
+  gap: 7px;
+}
+
+.champ-promo input {
+  min-width: 0;
+  flex: 1;
+  padding: 12px;
+  background: #ffffff;
+  color: #171916;
+  border: 1px solid #dedfd7;
+  border-radius: 0;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.champ-promo input:focus {
+  border-color: #718568;
+  outline: 1px solid #718568;
+}
+
+.champ-promo button {
+  padding: 0 13px;
+  background: #171916;
+  color: #ffffff;
+  border: 1px solid #171916;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.champ-promo button:hover:not(:disabled) {
+  background: #718568;
+  border-color: #718568;
+}
+
+.champ-promo button:disabled {
+  background: #718568;
+  color: #ffffff;
+}
+
+.message-promo {
+  margin: 9px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.message-promo.promo-valide {
+  color: #4f7146;
+}
+
+.message-promo.promo-invalide {
+  color: #9b3434;
+}
+
+.ligne-sous-total {
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.ligne-sous-total strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ligne-reduction {
+  margin-bottom: 12px;
+  color: #4f7146;
+  font-size: 13px;
+}
+
+.ligne-reduction strong {
+  font-size: 14px;
+}
+
+.total-final {
+  padding-top: 13px;
+  border-top: 1px solid #dedfd7;
+}
+
+.total-final strong {
+  font-size: 25px;
+}
+
+@keyframes defilement-traac {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 650px) {
+  .bandeau-defilement {
+    min-height: 35px;
+    gap: 20px;
+    font-size: 9px;
+    letter-spacing: 1.3px;
+    animation-duration: 22s;
+  }
+
+  .bandeau-action {
+    gap: 7px;
+    padding: 4px 8px 4px 25px;
+  }
+
+  .bandeau-action > span {
+    max-width: 58%;
+    font-size: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .bandeau-action button {
+    padding: 7px 8px;
+    font-size: 8px;
+    letter-spacing: 0.4px;
+  }
+}
+
+@media (max-width: 380px) {
+  .bandeau-action > span {
+    max-width: 52%;
+    font-size: 7px;
+  }
+
+  .bandeau-action button {
+    padding: 7px 6px;
+    font-size: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bandeau-defilement {
+    animation: none;
+  }
+}

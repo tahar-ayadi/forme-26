@@ -24,6 +24,12 @@ function App() {
 
   const [panierOuvert, setPanierOuvert] = useState(false);
 
+  // CODE PROMO DE BIENVENUE
+  const [codePromo, setCodePromo] = useState("");
+  const [promoApplique, setPromoApplique] = useState(false);
+  const [messagePromo, setMessagePromo] = useState("");
+  const [codeCopie, setCodeCopie] = useState(false);
+
   // APERÇU DU PRODUIT
   const [produitSelectionne, setProduitSelectionne] = useState(null);
   const [tailleSelectionnee, setTailleSelectionnee] = useState("");
@@ -42,6 +48,14 @@ function App() {
     categorie: "",
     image_url: "",
   });
+
+  // Retirer la réduction lorsque le panier est vide
+  useEffect(() => {
+    if (panier.length === 0) {
+      setPromoApplique(false);
+      setMessagePromo("");
+    }
+  }, [panier.length]);
 
   // SAUVEGARDE DU PANIER
   useEffect(() => {
@@ -186,6 +200,32 @@ function App() {
         Number(article.quantite || 0),
     0
   );
+
+  const montantReduction = promoApplique ? totalPanier * 0.25 : 0;
+  const totalAvecReduction = Math.max(0, totalPanier - montantReduction);
+
+  function appliquerCodePromo(evenement) {
+    evenement.preventDefault();
+    if (codePromo.trim().toUpperCase() === "TRAAC25") {
+      setPromoApplique(true);
+      setCodePromo("TRAAC25");
+      setMessagePromo("Code TRAAC25 appliqué : -25 % sur ton panier !");
+    } else {
+      setPromoApplique(false);
+      setMessagePromo("Ce code promo n'est pas valide.");
+    }
+  }
+
+  async function copierCodePromo() {
+    try {
+      await navigator.clipboard.writeText("TRAAC25");
+      setCodeCopie(true);
+      window.setTimeout(() => setCodeCopie(false), 1800);
+    } catch {
+      setCodePromo("TRAAC25");
+      setMessagePromo("Code TRAAC25 prêt à être copié.");
+    }
+  }
 
   // FORMULAIRE GÉRANT
   function modifierFormulaire(evenement) {
@@ -402,6 +442,30 @@ function App() {
 
   return (
     <main>
+      {/* OFFRE DE BIENVENUE ANIMÉE */}
+      <section className="bandeau-bienvenue" aria-label="Offre de bienvenue">
+        <div className="bandeau-defilement" aria-hidden="true">
+          <span>OFFRE DE BIENVENUE</span>
+          <span className="bandeau-separateur">✦</span>
+          <span>-25 % SUR TA PREMIÈRE COMMANDE</span>
+          <span className="bandeau-separateur">✦</span>
+          <span>CODE PROMO : TRAAC25</span>
+          <span className="bandeau-separateur">✦</span>
+          <span>OFFRE DE BIENVENUE</span>
+          <span className="bandeau-separateur">✦</span>
+          <span>-25 % SUR TA PREMIÈRE COMMANDE</span>
+          <span className="bandeau-separateur">✦</span>
+          <span>CODE PROMO : TRAAC25</span>
+          <span className="bandeau-separateur">✦</span>
+        </div>
+        <div className="bandeau-action">
+          <span>BIENVENUE CHEZ MAISON TRAAC — -25 %</span>
+          <button type="button" onClick={copierCodePromo} aria-label="Copier le code promo TRAAC25">
+            {codeCopie ? "CODE COPIÉ ✓" : "TRAAC25 · COPIER"}
+          </button>
+        </div>
+      </section>
+
       {/* =====================================
           EN-TÊTE
       ====================================== */}
@@ -980,11 +1044,47 @@ function App() {
                 </div>
 
                 <div className="bas-panier">
-                  <div className="ligne-total">
+                  <form className="formulaire-promo" onSubmit={appliquerCodePromo}>
+                    <label htmlFor="code-promo">Code promo</label>
+                    <div className="champ-promo">
+                      <input
+                        id="code-promo"
+                        type="text"
+                        value={codePromo}
+                        onChange={(e) => {
+                          setCodePromo(e.target.value);
+                          setMessagePromo("");
+                        }}
+                        placeholder="Entre TRAAC25"
+                        autoComplete="off"
+                        aria-label="Code promo"
+                      />
+                      <button type="submit" disabled={promoApplique}>
+                        {promoApplique ? "APPLIQUÉ" : "APPLIQUER"}
+                      </button>
+                    </div>
+                    {messagePromo && (
+                      <p className={`message-promo ${promoApplique ? "promo-valide" : "promo-invalide"}`}>
+                        {messagePromo}
+                      </p>
+                    )}
+                  </form>
+
+                  <div className="ligne-total ligne-sous-total">
                     <span>Sous-total</span>
-                    <strong>
-                      {totalPanier.toFixed(2)} €
-                    </strong>
+                    <strong>{totalPanier.toFixed(2)} €</strong>
+                  </div>
+
+                  {promoApplique && (
+                    <div className="ligne-total ligne-reduction">
+                      <span>Réduction TRAAC25 (−25 %)</span>
+                      <strong>−{montantReduction.toFixed(2)} €</strong>
+                    </div>
+                  )}
+
+                  <div className="ligne-total total-final">
+                    <span>Total</span>
+                    <strong>{totalAvecReduction.toFixed(2)} €</strong>
                   </div>
 
                   <p className="note-panier">
