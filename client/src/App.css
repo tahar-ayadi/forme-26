@@ -1512,7 +1512,6 @@ img {
   }
 }
 
-
 /* =========================================
    BANDEAU ANIMÉ — OFFRE DE BIENVENUE
 ========================================= */
@@ -1744,4 +1743,64 @@ img {
   .bandeau-defilement {
     animation: none;
   }
+}
+
+/* =========================================
+   BARRE DE RECHERCHE ET FILTRES HOMME/FEMME
+========================================= */
+
+.zone-filtres {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 35px;
+}
+
+.champ-recherche {
+  width: 100%;
+  max-width: 420px;
+  padding: 12px 14px;
+  border: 1px solid var(--bordure);
+  background: var(--blanc);
+  color: var(--noir);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.champ-recherche:focus {
+  border-color: var(--vert-fonce);
+  outline: 1px solid var(--vert-fonce);
+}
+
+.groupes-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.boutons-filtres {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bouton-filtre {
+  padding: 8px 14px;
+  border: 1px solid var(--bordure);
+  background: var(--blanc);
+  color: var(--noir);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bouton-filtre:hover {
+  border-color: var(--noir);
+}
+
+.bouton-filtre.actif {
+  background: var(--noir);
+  color: var(--blanc);
+  border-color: var(--noir);
 }

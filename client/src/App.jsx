@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import "./App.css";
 
@@ -41,6 +40,33 @@ function App() {
   const [page, setPage] = useState("boutique");
   const [messageGerant, setMessageGerant] = useState("");
   const [actionEnCours, setActionEnCours] = useState(false);
+
+  // FILTRE ET RECHERCHE (HOMME / FEMME & TYPES)
+  const [recherche, setRecherche] = useState("");
+  const [genreFiltre, setGenreFiltre] = useState("Tous");
+  const [typeFiltre, setTypeFiltre] = useState("Tous");
+
+  const vetementsFiltres = vetements.filter((v) => {
+    const texte = `${v.nom} ${v.categorie}`.toLowerCase();
+
+    // Filtre de genre
+    const matchGenre =
+      genreFiltre === "Tous" ||
+      (genreFiltre === "Homme" && texte.includes("homme")) ||
+      (genreFiltre === "Femme" && texte.includes("femme"));
+
+    // Filtre de type de produit
+    const matchType =
+      typeFiltre === "Tous" ||
+      (typeFiltre === "Chaussures" && texte.includes("chaussure")) ||
+      (typeFiltre === "Accessoires" && texte.includes("accessoire")) ||
+      (typeFiltre === "Vêtements" && !texte.includes("chaussure") && !texte.includes("accessoire"));
+
+    // Filtre par texte de recherche
+    const matchNom = v.nom.toLowerCase().includes(recherche.toLowerCase());
+
+    return matchGenre && matchType && matchNom;
+  });
 
   const [formulaire, setFormulaire] = useState({
     nom: "",
@@ -119,8 +145,6 @@ function App() {
     }
 
     setPanier((ancienPanier) => {
-      // Un même vêtement en deux tailles différentes
-      // correspond à deux variantes distinctes.
       const articleExistant = ancienPanier.find(
         (article) =>
           String(article.id) === String(vetement.id) &&
@@ -149,9 +173,6 @@ function App() {
       ];
     });
 
-    // IMPORTANT :
-    // On ferme uniquement l'aperçu du produit.
-    // On n'ouvre PAS le panier automatiquement.
     fermerApercu();
   }
 
@@ -325,8 +346,6 @@ function App() {
         )
       );
 
-      // Si le produit devient épuisé,
-      // on le retire du panier.
       if (!resultat.disponible) {
         setPanier((ancienPanier) =>
           ancienPanier.filter(
@@ -552,17 +571,57 @@ function App() {
           <section className="collection">
             <div className="titre-collection">
               <h2>La sélection</h2>
-              <p>{vetements.length} pièce(s)</p>
+              <p>{vetementsFiltres.length} pièce(s)</p>
             </div>
 
-            {vetements.length === 0 ? (
+            {/* BARRE DE RECHERCHE ET NOUVEAUX FILTRES */}
+            <div className="zone-filtres">
+              <input
+                type="text"
+                placeholder="Rechercher un modèle..."
+                value={recherche}
+                onChange={(e) => setRecherche(e.target.value)}
+                className="champ-recherche"
+              />
+
+              <div className="groupes-filtres">
+                {/* Filtre Genre */}
+                <div className="boutons-filtres">
+                  {["Tous", "Homme", "Femme"].map((genre) => (
+                    <button
+                      key={genre}
+                      type="button"
+                      className={`bouton-filtre ${genreFiltre === genre ? "actif" : ""}`}
+                      onClick={() => setGenreFiltre(genre)}
+                    >
+                      {genre}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Filtre Type d'article */}
+                <div className="boutons-filtres">
+                  {["Tous", "Vêtements", "Accessoires", "Chaussures"].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      className={`bouton-filtre ${typeFiltre === type ? "actif" : ""}`}
+                      onClick={() => setTypeFiltre(type)}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {vetementsFiltres.length === 0 ? (
               <p className="message-vide">
-                La collection arrive bientôt.
-                Repasse nous voir !
+                Aucun vêtement ne correspond à ta recherche.
               </p>
             ) : (
               <div className="grille">
-                {vetements.map((vetement) => (
+                {vetementsFiltres.map((vetement) => (
                   <article
                     className={`carte ${
                       vetement.disponible
@@ -639,7 +698,7 @@ function App() {
         </>
       ) : (
         /* =====================================
-           ESPACE GÉRANT
+            ESPACE GÉRANT
         ====================================== */
         <section className="gestion">
           <p className="surtitre">ESPACE ÉQUIPE</p>
