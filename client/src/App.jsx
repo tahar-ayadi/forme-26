@@ -15,6 +15,9 @@ const API_URL = `${API_BASE_URL.replace(/\/+$/, "")}/vetements`;
 
 const TAILLES = ["XS", "S", "M", "L", "XL"];
 
+// Mots de la catégorie qui classent un article dans « Accessoires » (ex. « Femme – sac »)
+const MOTS_ACCESSOIRES = ["accessoire", "sac"];
+
 // Le panier ne garde que la référence ; prix, nom et image viennent du catalogue.
 function lirePanierSauvegarde() {
   try {
@@ -89,11 +92,14 @@ function App() {
       (genreFiltre === "Femme" && texte.includes("femme"));
 
     // Filtre de type de produit
+    const estChaussure = texte.includes("chaussure");
+    const estAccessoire = MOTS_ACCESSOIRES.some((mot) => texte.includes(mot));
+
     const matchType =
       typeFiltre === "Tous" ||
-      (typeFiltre === "Chaussures" && texte.includes("chaussure")) ||
-      (typeFiltre === "Accessoires" && texte.includes("accessoire")) ||
-      (typeFiltre === "Vêtements" && !texte.includes("chaussure") && !texte.includes("accessoire"));
+      (typeFiltre === "Chaussures" && estChaussure) ||
+      (typeFiltre === "Accessoires" && estAccessoire) ||
+      (typeFiltre === "Vêtements" && !estChaussure && !estAccessoire);
 
     // Filtre par texte de recherche
     const matchNom = v.nom.toLowerCase().includes(recherche.toLowerCase());

@@ -328,10 +328,18 @@ img {
   font-size: 14px;
 }
 
+/* Cartes en flex : --colonnes cartes par ligne, séparées par --ecart */
 .grille {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 38px 24px;
+  --colonnes: 3;
+  --ecart: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 38px var(--ecart);
+}
+
+.grille > .carte {
+  flex: 0 0
+    calc((100% - (var(--colonnes) - 1) * var(--ecart)) / var(--colonnes));
 }
 
 .carte {
@@ -365,7 +373,16 @@ img {
   transform: scale(1.045);
 }
 
+/* Article indisponible : toute la carte en grisé */
+.carte.indisponible {
+  filter: grayscale(1);
+}
+
 .indisponible .cadre-image img {
+  opacity: 0.55;
+}
+
+.indisponible .infos-carte {
   opacity: 0.55;
 }
 
@@ -1250,8 +1267,9 @@ img {
   }
 
   .grille {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 28px 20px;
+    --colonnes: 2;
+    --ecart: 20px;
+    row-gap: 28px;
   }
 
   .ligne-gerant {
@@ -1336,8 +1354,9 @@ img {
   }
 
   .grille {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 26px 12px;
+    --colonnes: 2;
+    --ecart: 12px;
+    row-gap: 26px;
   }
 
   .infos-carte {
@@ -1502,7 +1521,7 @@ img {
   }
 
   .grille {
-    grid-template-columns: 1fr;
+    --colonnes: 1;
   }
 
   .introduction h1 {
