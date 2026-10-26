@@ -6,8 +6,15 @@ import { validateVetementPayload } from "./validation.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FRONTEND_ORIGIN =
-  process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+// Adresses autorisées à appeler l'API, séparées par des virgules
+// (ex. "https://maison-traac.netlify.app,http://localhost:5173").
+// Le "/" final est retiré : le navigateur envoie l'origine sans.
+const FRONTEND_ORIGIN = (
+  process.env.FRONTEND_ORIGIN || "http://localhost:5173"
+)
+  .split(",")
+  .map((origine) => origine.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
 const PUBLIC_VETEMENT_COLUMNS =
   "id, nom, prix, categorie, image_url, disponible, description";
 
