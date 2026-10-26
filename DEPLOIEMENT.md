@@ -19,27 +19,22 @@ Netlify et Render redéploient automatiquement à chaque push sur la branche cho
 
 ## Ordre à suivre
 
-L'ordre compte : la nouvelle API n'accepte que l'origine `FRONTEND_ORIGIN`.
-Si elle est déployée avant que la variable soit réglée, le site ne charge plus les articles.
+Netlify lit `netlify.toml` dans la branche qu'il déploie (`master` sur GitHub) :
+le code doit donc être poussé **avant** de créer le site.
+Et la nouvelle API n'accepte que l'origine `FRONTEND_ORIGIN` : on la règle en premier.
 
-### 1. Créer le site Netlify
-
-1. Netlify → **Add new site** → **Import an existing project** → GitHub → repo `forme-26`.
-2. Branche : `master`. Laisser les champs de build vides : ils sont lus dans `netlify.toml`
-   (base `client`, commande `npm run build`, dossier publié `dist`, Node 22).
-3. **Deploy**, puis **Site configuration → Change site name** (ex. `maison-traac`).
-4. Noter l'URL : `https://<nom>.netlify.app`.
-
-### 2. Régler l'API sur Render
+### 1. Régler l'API sur Render
 
 Dans le service existant (`maison-traac`) :
 
 1. **Settings** : Root Directory `server`, Build Command `npm install`, Start Command `npm start`, Branch `master`.
-2. **Environment** : ajouter `FRONTEND_ORIGIN` = l'URL Netlify de l'étape 1 (sans `/` final).
-   Plusieurs adresses possibles, séparées par des virgules.
+2. **Environment** : ajouter `FRONTEND_ORIGIN` = l'URL Netlify **prévue**, sans `/` final
+   (ex. `https://maison-traac.netlify.app`). Plusieurs adresses possibles, séparées par des virgules.
 3. Enregistrer.
 
-### 3. Publier le code
+L'API actuellement en ligne ignore cette variable : ce réglage ne casse rien.
+
+### 2. Publier le code sur `master`
 
 Fusionner la branche de travail dans `master` puis pousser :
 
@@ -49,7 +44,17 @@ git merge nouv_modif
 git push origin master
 ```
 
-Render et Netlify redéploient tout seuls (2 à 5 minutes).
+Render redéploie la nouvelle API tout seul (2 à 5 minutes), et `netlify.toml` est maintenant sur GitHub.
+
+### 3. Créer le site Netlify
+
+1. Netlify → **Add new site** → **Import an existing project** → GitHub → repo `forme-26`.
+2. Branche : `master`. Laisser les champs de build vides : ils sont lus dans `netlify.toml`
+   (base `client`, commande `npm run build`, dossier publié `dist`, Node 22).
+3. **Deploy**, puis **Site configuration → Change site name** : le nom choisi à l'étape 1 (ex. `maison-traac`).
+4. Si ce nom est déjà pris, en choisir un autre et mettre la nouvelle URL dans `FRONTEND_ORIGIN` sur Render.
+
+Ensuite, chaque push sur `master` redéploie le front et l'API.
 
 ### 4. Vérifier
 
