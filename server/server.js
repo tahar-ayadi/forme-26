@@ -2,18 +2,31 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { supabase } from "./supabaseClient.js";
+import { validateVetementPayload } from "./validation.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const FRONTEND_ORIGIN =
+  process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+const PUBLIC_VETEMENT_COLUMNS =
+  "id, nom, prix, categorie, image_url, disponible, description";
 
-app.use(cors());
+app.disable("x-powered-by");
+app.use(cors({ origin: FRONTEND_ORIGIN }));
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
+  next();
+});
 
-app.use(express.json());
+app.use(express.json({ limit: "100kb" }));
 
 app.get("/vetements", async (req, res) => {
   const { data, error } = await supabase
     .from("vetements")
-    .select("*")
+    .select(PUBLIC_VETEMENT_COLUMNS)
     .order("id", { ascending: true });
 
   if (error) {
@@ -25,46 +38,19 @@ app.get("/vetements", async (req, res) => {
 });
 
 app.post("/vetements", async (req, res) => {
-  const {
-    nom,
-    prix,
-    categorie,
-    image_url,
-    disponible = true,
-  } = req.body ?? {};
+  const validation = validateVetementPayload({
+    ...req.body,
+    disponible: req.body?.disponible ?? true,
+  });
 
-  const prixNumerique = Number(prix);
-
-  const champsInvalides =
-    typeof nom !== "string" ||
-    nom.trim() === "" ||
-    prix === "" ||
-    prix === null ||
-    prix === undefined ||
-    !Number.isFinite(prixNumerique) ||
-    prixNumerique < 0 ||
-    typeof categorie !== "string" ||
-    categorie.trim() === "" ||
-    typeof image_url !== "string" ||
-    image_url.trim() === "" ||
-    typeof disponible !== "boolean";
-
-  if (champsInvalides) {
-    return res.status(400).json({
-      error: "Nom, prix positif ou nul, catégorie et image sont obligatoires.",
-    });
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
   }
 
   const { data, error } = await supabase
     .from("vetements")
-    .insert({
-      nom: nom.trim(),
-      prix: prixNumerique,
-      categorie: categorie.trim(),
-      image_url: image_url.trim(),
-      disponible,
-    })
-    .select()
+    .insert(validation.value)
+    .select(PUBLIC_VETEMENT_COLUMNS)
     .single();
 
   if (error) {
@@ -82,47 +68,17 @@ app.put("/vetements/:id", async (req, res) => {
     return res.status(404).json({ error: "Vêtement introuvable." });
   }
 
-  const {
-    nom,
-    prix,
-    categorie,
-    image_url,
-    disponible,
-  } = req.body ?? {};
+  const validation = validateVetementPayload(req.body);
 
-  const prixNumerique = Number(prix);
-
-  const champsInvalides =
-    typeof nom !== "string" ||
-    nom.trim() === "" ||
-    prix === "" ||
-    prix === null ||
-    prix === undefined ||
-    !Number.isFinite(prixNumerique) ||
-    prixNumerique < 0 ||
-    typeof categorie !== "string" ||
-    categorie.trim() === "" ||
-    typeof image_url !== "string" ||
-    image_url.trim() === "" ||
-    typeof disponible !== "boolean";
-
-  if (champsInvalides) {
-    return res.status(400).json({
-      error: "Nom, prix positif ou nul, catégorie, image et disponibilité sont obligatoires.",
-    });
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
   }
 
   const { data, error } = await supabase
     .from("vetements")
-    .update({
-      nom: nom.trim(),
-      prix: prixNumerique,
-      categorie: categorie.trim(),
-      image_url: image_url.trim(),
-      disponible,
-    })
+    .update(validation.value)
     .eq("id", id)
-    .select()
+    .select(PUBLIC_VETEMENT_COLUMNS)
     .maybeSingle();
 
   if (error) {
@@ -148,7 +104,7 @@ app.delete("/vetements/:id", async (req, res) => {
     .from("vetements")
     .delete()
     .eq("id", id)
-    .select()
+    .select("id")
     .maybeSingle();
 
   if (error) {
@@ -163,7 +119,19 @@ app.delete("/vetements/:id", async (req, res) => {
   return res.status(204).send();
 });
 
+app.use((error, req, res, next) => {
+  if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
+    return res.status(400).json({ error: "Le corps JSON est malformé." });
+  }
+
+  if (error.type === "entity.too.large") {
+    return res.status(413).json({ error: "La requête est trop volumineuse." });
+  }
+
+  console.error("Erreur serveur inattendue :", error.message);
+  return res.status(500).json({ error: "Une erreur interne est survenue." });
+});
+
 app.listen(PORT, () => {
   console.log(`API FORME 26 démarrée sur http://localhost:${PORT}`);
 });
-

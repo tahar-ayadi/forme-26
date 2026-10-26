@@ -523,7 +523,8 @@ img {
   font-weight: 700;
 }
 
-.formulaire input {
+.formulaire input,
+.formulaire textarea {
   width: 100%;
   min-height: 48px;
   padding: 12px 14px;
@@ -533,8 +534,20 @@ img {
   border-radius: 0;
 }
 
-.formulaire input:focus {
+.formulaire textarea {
+  font: inherit;
+  font-weight: 400;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.formulaire input:focus,
+.formulaire textarea:focus {
   border-color: var(--vert-fonce);
+}
+
+.formulaire .champ-description {
+  grid-column: 1 / -1;
 }
 
 .formulaire .bouton-ajouter {
@@ -1803,4 +1816,103 @@ img {
   background: var(--noir);
   color: var(--blanc);
   border-color: var(--noir);
+}
+
+/* =========================================
+   DÉTAILS CACHÉS — ATELIER SECRET
+========================================= */
+
+.easter-egg-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1400;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px;
+  width: min(390px, calc(100vw - 32px));
+  padding: 18px 17px;
+  background: var(--noir);
+  color: var(--ivoire);
+  border: 1px solid var(--vert);
+  box-shadow: 10px 10px 0 rgba(113, 133, 104, 0.3);
+  animation: apparition-atelier 0.28s ease-out;
+}
+
+.easter-egg-toast-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--vert);
+  color: var(--noir);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.easter-egg-toast-kicker {
+  margin: 0 0 6px;
+  color: var(--vert);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.easter-egg-toast-title {
+  margin: 0;
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.easter-egg-toast-detail {
+  margin: 7px 0 0;
+  color: #d9ded4;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.easter-egg-toast-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  color: var(--ivoire);
+  border: 1px solid rgba(245, 244, 239, 0.35);
+  font-size: 21px;
+  line-height: 1;
+}
+
+.easter-egg-toast-close:hover {
+  background: var(--ivoire);
+  color: var(--noir);
+}
+
+@keyframes apparition-atelier {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 650px) {
+  .easter-egg-toast {
+    right: 16px;
+    bottom: 16px;
+    width: calc(100vw - 32px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .easter-egg-toast {
+    animation: none;
+  }
 }

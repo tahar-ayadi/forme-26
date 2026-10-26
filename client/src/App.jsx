@@ -1,25 +1,58 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import {
+  EasterEggToast,
+} from "./components/EasterEggs";
+import { useEasterEggs } from "./components/useEasterEggs";
 
-const API_URL = "https://maison-traac.onrender.com/vetements";
+// VITE_API_URL prime ; sinon API locale en dev et API Render en production.
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV
+    ? "http://localhost:3000"
+    : "https://maison-traac.onrender.com");
+const API_URL = `${API_BASE_URL.replace(/\/+$/, "")}/vetements`;
 
 const TAILLES = ["XS", "S", "M", "L", "XL"];
 
-function App() {
-  const [vetements, setVetements] = useState([]);
+// Le panier ne garde que la référence ; prix, nom et image viennent du catalogue.
+function lirePanierSauvegarde() {
+  try {
+    const sauvegarde = JSON.parse(
+      localStorage.getItem("panier-forme26") || "[]"
+    );
 
-  // PANIER
-  const [panier, setPanier] = useState(() => {
-    try {
-      const sauvegarde = JSON.parse(
-        localStorage.getItem("panier-forme26") || "[]"
-      );
-
-      return Array.isArray(sauvegarde) ? sauvegarde : [];
-    } catch {
+    if (!Array.isArray(sauvegarde)) {
       return [];
     }
-  });
+
+    return sauvegarde
+      .filter(
+        (article) =>
+          article &&
+          (typeof article.id === "number" ||
+            typeof article.id === "string") &&
+          TAILLES.includes(article.taille) &&
+          Number.isInteger(article.quantite) &&
+          article.quantite > 0
+      )
+      .map(({ id, taille, quantite }) => ({ id, taille, quantite }));
+  } catch {
+    return [];
+  }
+}
+
+function App() {
+  const [vetements, setVetements] = useState([]);
+  const {
+    revelation,
+    handleLogoClick,
+    closeRevelation,
+    showCopyConfirmation,
+  } = useEasterEggs();
+
+  // PANIER
+  const [panier, setPanier] = useState(lirePanierSauvegarde);
 
   const [panierOuvert, setPanierOuvert] = useState(false);
 
@@ -73,14 +106,21 @@ function App() {
     prix: "",
     categorie: "",
     image_url: "",
+    description: "",
   });
 
   // Retirer la réduction lorsque le panier est vide
   useEffect(() => {
     if (panier.length === 0) {
-      setPromoApplique(false);
-      setMessagePromo("");
+      const resetPromo = window.setTimeout(() => {
+        setPromoApplique(false);
+        setMessagePromo("");
+      }, 0);
+
+      return () => window.clearTimeout(resetPromo);
     }
+
+    return undefined;
   }, [panier.length]);
 
   // SAUVEGARDE DU PANIER
@@ -105,6 +145,17 @@ function App() {
 
         const donnees = await reponse.json();
         setVetements(donnees);
+
+        // Retirer du panier les articles supprimés ou épuisés depuis la dernière visite
+        setPanier((ancienPanier) =>
+          ancienPanier.filter((article) =>
+            donnees.some(
+              (vetement) =>
+                String(vetement.id) === String(article.id) &&
+                vetement.disponible
+            )
+          )
+        );
       } catch {
         setErreur(
           "Impossible de joindre l'API. Vérifie que le serveur est démarré."
@@ -166,7 +217,7 @@ function App() {
       return [
         ...ancienPanier,
         {
-          ...vetement,
+          id: vetement.id,
           taille,
           quantite: 1,
         },
@@ -178,43 +229,62 @@ function App() {
 
   // MODIFIER LA QUANTITÉ
   function modifierQuantite(id, taille, variation) {
-    setPanier((ancienPanier) =>
-      ancienPanier
-        .map((article) =>
-          String(article.id) === String(id) &&
-          article.taille === taille
-            ? {
-                ...article,
-                quantite: article.quantite + variation,
-              }
-            : article
-        )
-        .filter((article) => article.quantite > 0)
-    );
+    const panierMisAJour = panier
+      .map((article) =>
+        String(article.id) === String(id) &&
+        article.taille === taille
+          ? {
+              ...article,
+              quantite: article.quantite + variation,
+            }
+          : article
+      )
+      .filter((article) => article.quantite > 0);
+
+    setPanier(panierMisAJour);
+    if (panierMisAJour.length === 0) {
+      setPromoApplique(false);
+      setMessagePromo("");
+    }
   }
 
   // SUPPRIMER UNE VARIANTE DU PANIER
   function supprimerDuPanier(id, taille) {
-    setPanier((ancienPanier) =>
-      ancienPanier.filter(
-        (article) =>
-          !(
-            String(article.id) === String(id) &&
-            article.taille === taille
-          )
-      )
-    );
+    const panierMisAJour = panier.filter(
+      (article) =>
+        !(
+          String(article.id) === String(id) &&
+          article.taille === taille
+        )
+      );
+
+    setPanier(panierMisAJour);
+    if (panierMisAJour.length === 0) {
+      setPromoApplique(false);
+      setMessagePromo("");
+    }
   }
 
+  // ARTICLES DU PANIER AVEC LES DONNÉES À JOUR DU CATALOGUE
+  const articlesPanier = panier.flatMap((article) => {
+    const vetement = vetements.find(
+      (v) => String(v.id) === String(article.id)
+    );
+
+    return vetement?.disponible
+      ? [{ ...vetement, taille: article.taille, quantite: article.quantite }]
+      : [];
+  });
+
   // COMPTEUR DU PANIER
-  const nombreArticles = panier.reduce(
+  const nombreArticles = articlesPanier.reduce(
     (total, article) =>
       total + Number(article.quantite || 0),
     0
   );
 
   // TOTAL
-  const totalPanier = panier.reduce(
+  const totalPanier = articlesPanier.reduce(
     (total, article) =>
       total +
       Number(article.prix || 0) *
@@ -241,6 +311,7 @@ function App() {
     try {
       await navigator.clipboard.writeText("TRAAC25");
       setCodeCopie(true);
+      showCopyConfirmation();
       window.setTimeout(() => setCodeCopie(false), 1800);
     } catch {
       setCodePromo("TRAAC25");
@@ -295,6 +366,7 @@ function App() {
         prix: "",
         categorie: "",
         image_url: "",
+        description: "",
       });
 
       setMessageGerant(
@@ -347,12 +419,15 @@ function App() {
       );
 
       if (!resultat.disponible) {
-        setPanier((ancienPanier) =>
-          ancienPanier.filter(
-            (article) =>
-              String(article.id) !== String(vetement.id)
-          )
+        const panierMisAJour = panier.filter(
+          (article) =>
+            String(article.id) !== String(vetement.id)
         );
+        setPanier(panierMisAJour);
+        if (panierMisAJour.length === 0) {
+          setPromoApplique(false);
+          setMessagePromo("");
+        }
 
         if (
           String(produitSelectionne?.id) ===
@@ -497,6 +572,7 @@ function App() {
             e.preventDefault();
             setPage("boutique");
           }}
+          onClickCapture={handleLogoClick}
         >
           <span className="logo-maison-texte">Maison</span>
           <span className="logo-traac">TRAAC</span>
@@ -762,6 +838,18 @@ function App() {
               />
             </label>
 
+            <label className="champ-description">
+              Description (facultative)
+              <textarea
+                name="description"
+                value={formulaire.description}
+                onChange={modifierFormulaire}
+                placeholder="Matière, coupe, conseils pour la porter..."
+                maxLength={2000}
+                rows={4}
+              />
+            </label>
+
             <button
               className="bouton-ajouter"
               disabled={actionEnCours}
@@ -826,9 +914,15 @@ function App() {
 
                   <button
                     className="bouton-supprimer"
-                    onClick={() =>
-                      supprimerVetement(vetement.id)
-                    }
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `Supprimer « ${vetement.nom} » de la collection ?`
+                        )
+                      ) {
+                        supprimerVetement(vetement.id);
+                      }
+                    }}
                     disabled={actionEnCours}
                   >
                     Supprimer
@@ -1004,7 +1098,7 @@ function App() {
               </button>
             </div>
 
-            {panier.length === 0 ? (
+            {articlesPanier.length === 0 ? (
               <div className="panier-vide">
                 <p className="icone-panier-vide">🛍</p>
                 <h3>Ton panier est vide</h3>
@@ -1024,7 +1118,7 @@ function App() {
             ) : (
               <>
                 <div className="contenu-panier">
-                  {panier.map((article) => (
+                  {articlesPanier.map((article) => (
                     <article
                       className="article-panier"
                       key={`${article.id}-${article.taille}`}
@@ -1154,8 +1248,10 @@ function App() {
                     type="button"
                     className="bouton-commande"
                     onClick={() =>
-                      alert(
-                        "Le paiement n'est pas encore configuré sur cette boutique."
+                      window.open(
+                        "https://youtu.be/dQw4w9WgXcQ?list=RDdQw4w9WgXcQ",
+                        "_blank",
+                        "noopener,noreferrer"
                       )
                     }
                   >
@@ -1175,6 +1271,11 @@ function App() {
           </aside>
         </>
       )}
+
+      <EasterEggToast
+        revelation={revelation}
+        onClose={closeRevelation}
+      />
 
       {/* PIED DE PAGE — MAISON TRAAC */}
       <footer className="footer-signature">
