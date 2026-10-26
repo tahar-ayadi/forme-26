@@ -1,0 +1,9 @@
+# Déploiement du front React sur Netlify (monorepo : le front est dans client/)
+[build]
+  base = "client"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Vite 8 demande Node 20.19+ ou 22.12+
+  NODE_VERSION = "22"

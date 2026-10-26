@@ -1,25 +1,61 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import {
+  EasterEggToast,
+} from "./components/EasterEggs";
+import { useEasterEggs } from "./components/useEasterEggs";
 
-const API_URL = "https://maison-traac.onrender.com/vetements";
+// VITE_API_URL prime ; sinon API locale en dev et API Render en production.
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV
+    ? "http://localhost:3000"
+    : "https://maison-traac.onrender.com");
+const API_URL = `${API_BASE_URL.replace(/\/+$/, "")}/vetements`;
 
 const TAILLES = ["XS", "S", "M", "L", "XL"];
 
-function App() {
-  const [vetements, setVetements] = useState([]);
+// Mots de la catégorie qui classent un article dans « Accessoires » (ex. « Femme – sac »)
+const MOTS_ACCESSOIRES = ["accessoire", "sac"];
 
-  // PANIER
-  const [panier, setPanier] = useState(() => {
-    try {
-      const sauvegarde = JSON.parse(
-        localStorage.getItem("panier-forme26") || "[]"
-      );
+// Le panier ne garde que la référence ; prix, nom et image viennent du catalogue.
+function lirePanierSauvegarde() {
+  try {
+    const sauvegarde = JSON.parse(
+      localStorage.getItem("panier-forme26") || "[]"
+    );
 
-      return Array.isArray(sauvegarde) ? sauvegarde : [];
-    } catch {
+    if (!Array.isArray(sauvegarde)) {
       return [];
     }
-  });
+
+    return sauvegarde
+      .filter(
+        (article) =>
+          article &&
+          (typeof article.id === "number" ||
+            typeof article.id === "string") &&
+          TAILLES.includes(article.taille) &&
+          Number.isInteger(article.quantite) &&
+          article.quantite > 0
+      )
+      .map(({ id, taille, quantite }) => ({ id, taille, quantite }));
+  } catch {
+    return [];
+  }
+}
+
+function App() {
+  const [vetements, setVetements] = useState([]);
+  const {
+    revelation,
+    handleLogoClick,
+    closeRevelation,
+    showCopyConfirmation,
+  } = useEasterEggs();
+
+  // PANIER
+  const [panier, setPanier] = useState(lirePanierSauvegarde);
 
   const [panierOuvert, setPanierOuvert] = useState(false);
 
@@ -46,6 +82,11 @@ function App() {
   const [genreFiltre, setGenreFiltre] = useState("Tous");
   const [typeFiltre, setTypeFiltre] = useState("Tous");
 
+  // Les 3 premières pièces disponibles, mises en avant dans l'introduction
+  const vetementsHero = vetements
+    .filter((v) => v.disponible && v.image_url)
+    .slice(0, 3);
+
   const vetementsFiltres = vetements.filter((v) => {
     const texte = `${v.nom} ${v.categorie}`.toLowerCase();
 
@@ -56,11 +97,14 @@ function App() {
       (genreFiltre === "Femme" && texte.includes("femme"));
 
     // Filtre de type de produit
+    const estChaussure = texte.includes("chaussure");
+    const estAccessoire = MOTS_ACCESSOIRES.some((mot) => texte.includes(mot));
+
     const matchType =
       typeFiltre === "Tous" ||
-      (typeFiltre === "Chaussures" && texte.includes("chaussure")) ||
-      (typeFiltre === "Accessoires" && texte.includes("accessoire")) ||
-      (typeFiltre === "Vêtements" && !texte.includes("chaussure") && !texte.includes("accessoire"));
+      (typeFiltre === "Chaussures" && estChaussure) ||
+      (typeFiltre === "Accessoires" && estAccessoire) ||
+      (typeFiltre === "Vêtements" && !estChaussure && !estAccessoire);
 
     // Filtre par texte de recherche
     const matchNom = v.nom.toLowerCase().includes(recherche.toLowerCase());
@@ -73,14 +117,21 @@ function App() {
     prix: "",
     categorie: "",
     image_url: "",
+    description: "",
   });
 
   // Retirer la réduction lorsque le panier est vide
   useEffect(() => {
     if (panier.length === 0) {
-      setPromoApplique(false);
-      setMessagePromo("");
+      const resetPromo = window.setTimeout(() => {
+        setPromoApplique(false);
+        setMessagePromo("");
+      }, 0);
+
+      return () => window.clearTimeout(resetPromo);
     }
+
+    return undefined;
   }, [panier.length]);
 
   // SAUVEGARDE DU PANIER
@@ -105,6 +156,17 @@ function App() {
 
         const donnees = await reponse.json();
         setVetements(donnees);
+
+        // Retirer du panier les articles supprimés ou épuisés depuis la dernière visite
+        setPanier((ancienPanier) =>
+          ancienPanier.filter((article) =>
+            donnees.some(
+              (vetement) =>
+                String(vetement.id) === String(article.id) &&
+                vetement.disponible
+            )
+          )
+        );
       } catch {
         setErreur(
           "Impossible de joindre l'API. Vérifie que le serveur est démarré."
@@ -166,7 +228,7 @@ function App() {
       return [
         ...ancienPanier,
         {
-          ...vetement,
+          id: vetement.id,
           taille,
           quantite: 1,
         },
@@ -178,43 +240,62 @@ function App() {
 
   // MODIFIER LA QUANTITÉ
   function modifierQuantite(id, taille, variation) {
-    setPanier((ancienPanier) =>
-      ancienPanier
-        .map((article) =>
-          String(article.id) === String(id) &&
-          article.taille === taille
-            ? {
-                ...article,
-                quantite: article.quantite + variation,
-              }
-            : article
-        )
-        .filter((article) => article.quantite > 0)
-    );
+    const panierMisAJour = panier
+      .map((article) =>
+        String(article.id) === String(id) &&
+        article.taille === taille
+          ? {
+              ...article,
+              quantite: article.quantite + variation,
+            }
+          : article
+      )
+      .filter((article) => article.quantite > 0);
+
+    setPanier(panierMisAJour);
+    if (panierMisAJour.length === 0) {
+      setPromoApplique(false);
+      setMessagePromo("");
+    }
   }
 
   // SUPPRIMER UNE VARIANTE DU PANIER
   function supprimerDuPanier(id, taille) {
-    setPanier((ancienPanier) =>
-      ancienPanier.filter(
-        (article) =>
-          !(
-            String(article.id) === String(id) &&
-            article.taille === taille
-          )
-      )
-    );
+    const panierMisAJour = panier.filter(
+      (article) =>
+        !(
+          String(article.id) === String(id) &&
+          article.taille === taille
+        )
+      );
+
+    setPanier(panierMisAJour);
+    if (panierMisAJour.length === 0) {
+      setPromoApplique(false);
+      setMessagePromo("");
+    }
   }
 
+  // ARTICLES DU PANIER AVEC LES DONNÉES À JOUR DU CATALOGUE
+  const articlesPanier = panier.flatMap((article) => {
+    const vetement = vetements.find(
+      (v) => String(v.id) === String(article.id)
+    );
+
+    return vetement?.disponible
+      ? [{ ...vetement, taille: article.taille, quantite: article.quantite }]
+      : [];
+  });
+
   // COMPTEUR DU PANIER
-  const nombreArticles = panier.reduce(
+  const nombreArticles = articlesPanier.reduce(
     (total, article) =>
       total + Number(article.quantite || 0),
     0
   );
 
   // TOTAL
-  const totalPanier = panier.reduce(
+  const totalPanier = articlesPanier.reduce(
     (total, article) =>
       total +
       Number(article.prix || 0) *
@@ -241,6 +322,7 @@ function App() {
     try {
       await navigator.clipboard.writeText("TRAAC25");
       setCodeCopie(true);
+      showCopyConfirmation();
       window.setTimeout(() => setCodeCopie(false), 1800);
     } catch {
       setCodePromo("TRAAC25");
@@ -295,6 +377,7 @@ function App() {
         prix: "",
         categorie: "",
         image_url: "",
+        description: "",
       });
 
       setMessageGerant(
@@ -347,12 +430,15 @@ function App() {
       );
 
       if (!resultat.disponible) {
-        setPanier((ancienPanier) =>
-          ancienPanier.filter(
-            (article) =>
-              String(article.id) !== String(vetement.id)
-          )
+        const panierMisAJour = panier.filter(
+          (article) =>
+            String(article.id) !== String(vetement.id)
         );
+        setPanier(panierMisAJour);
+        if (panierMisAJour.length === 0) {
+          setPromoApplique(false);
+          setMessagePromo("");
+        }
 
         if (
           String(produitSelectionne?.id) ===
@@ -497,6 +583,7 @@ function App() {
             e.preventDefault();
             setPage("boutique");
           }}
+          onClickCapture={handleLogoClick}
         >
           <span className="logo-maison-texte">Maison</span>
           <span className="logo-traac">TRAAC</span>
@@ -552,23 +639,72 @@ function App() {
       {page === "boutique" ? (
         <>
           <section className="introduction">
-            <p className="surtitre">
-              COLLECTION 2026
-            </p>
+            <div className="hero-texte">
+              <p className="surtitre">
+                COLLECTION 2026 · HOMME &amp; FEMME
+              </p>
 
-            <h1>
-              Les essentiels
-              <br />
-              qui changent tout.
-            </h1>
+              <h1>
+                Les essentiels
+                <br />
+                <span className="hero-accent">
+                  qui changent tout.
+                </span>
+              </h1>
 
-            <p className="description">
-              Des pièces pensées pour bouger, vivre et
-              affirmer son style.
-            </p>
+              <p className="description">
+                Des pièces pensées pour bouger, vivre et
+                affirmer son style. Des coupes nettes, des
+                matières qui durent, du matin au soir.
+              </p>
+
+              <div className="hero-actions">
+                <a className="hero-bouton" href="#selection">
+                  Découvrir la sélection ↓
+                </a>
+
+                <button
+                  type="button"
+                  className="hero-bouton hero-bouton-secondaire"
+                  onClick={copierCodePromo}
+                >
+                  {codeCopie
+                    ? "Code TRAAC25 copié ✓"
+                    : "−25 % avec TRAAC25"}
+                </button>
+              </div>
+
+              <ul className="hero-atouts">
+                <li>{vetements.length} pièces Homme &amp; Femme</li>
+                <li>
+                  Tailles {TAILLES[0]} à {TAILLES[TAILLES.length - 1]}
+                </li>
+                <li>−25 % sur ta première commande</li>
+              </ul>
+            </div>
+
+            {/* 3 pièces disponibles du catalogue : un clic ouvre l'aperçu */}
+            {vetementsHero.length > 0 && (
+              <div className="hero-visuels">
+                {vetementsHero.map((vetement) => (
+                  <button
+                    key={vetement.id}
+                    type="button"
+                    className="hero-visuel"
+                    onClick={() => ouvrirApercu(vetement)}
+                    aria-label={`Voir ${vetement.nom}`}
+                  >
+                    <img src={vetement.image_url} alt="" />
+                    <span className="hero-prix">
+                      {Number(vetement.prix).toFixed(2)} €
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
 
-          <section className="collection">
+          <section className="collection" id="selection">
             <div className="titre-collection">
               <h2>La sélection</h2>
               <p>{vetementsFiltres.length} pièce(s)</p>
@@ -762,6 +898,18 @@ function App() {
               />
             </label>
 
+            <label className="champ-description">
+              Description (facultative)
+              <textarea
+                name="description"
+                value={formulaire.description}
+                onChange={modifierFormulaire}
+                placeholder="Matière, coupe, conseils pour la porter..."
+                maxLength={2000}
+                rows={4}
+              />
+            </label>
+
             <button
               className="bouton-ajouter"
               disabled={actionEnCours}
@@ -826,9 +974,15 @@ function App() {
 
                   <button
                     className="bouton-supprimer"
-                    onClick={() =>
-                      supprimerVetement(vetement.id)
-                    }
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `Supprimer « ${vetement.nom} » de la collection ?`
+                        )
+                      ) {
+                        supprimerVetement(vetement.id);
+                      }
+                    }}
                     disabled={actionEnCours}
                   >
                     Supprimer
@@ -1004,7 +1158,7 @@ function App() {
               </button>
             </div>
 
-            {panier.length === 0 ? (
+            {articlesPanier.length === 0 ? (
               <div className="panier-vide">
                 <p className="icone-panier-vide">🛍</p>
                 <h3>Ton panier est vide</h3>
@@ -1024,7 +1178,7 @@ function App() {
             ) : (
               <>
                 <div className="contenu-panier">
-                  {panier.map((article) => (
+                  {articlesPanier.map((article) => (
                     <article
                       className="article-panier"
                       key={`${article.id}-${article.taille}`}
@@ -1154,8 +1308,10 @@ function App() {
                     type="button"
                     className="bouton-commande"
                     onClick={() =>
-                      alert(
-                        "Le paiement n'est pas encore configuré sur cette boutique."
+                      window.open(
+                        "https://youtu.be/dQw4w9WgXcQ?list=RDdQw4w9WgXcQ",
+                        "_blank",
+                        "noopener,noreferrer"
                       )
                     }
                   >
@@ -1175,6 +1331,11 @@ function App() {
           </aside>
         </>
       )}
+
+      <EasterEggToast
+        revelation={revelation}
+        onClose={closeRevelation}
+      />
 
       {/* PIED DE PAGE — MAISON TRAAC */}
       <footer className="footer-signature">
