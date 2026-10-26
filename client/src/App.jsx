@@ -82,6 +82,11 @@ function App() {
   const [genreFiltre, setGenreFiltre] = useState("Tous");
   const [typeFiltre, setTypeFiltre] = useState("Tous");
 
+  // Les 3 premières pièces disponibles, mises en avant dans l'introduction
+  const vetementsHero = vetements
+    .filter((v) => v.disponible && v.image_url)
+    .slice(0, 3);
+
   const vetementsFiltres = vetements.filter((v) => {
     const texte = `${v.nom} ${v.categorie}`.toLowerCase();
 
@@ -634,23 +639,72 @@ function App() {
       {page === "boutique" ? (
         <>
           <section className="introduction">
-            <p className="surtitre">
-              COLLECTION 2026
-            </p>
+            <div className="hero-texte">
+              <p className="surtitre">
+                COLLECTION 2026 · HOMME &amp; FEMME
+              </p>
 
-            <h1>
-              Les essentiels
-              <br />
-              qui changent tout.
-            </h1>
+              <h1>
+                Les essentiels
+                <br />
+                <span className="hero-accent">
+                  qui changent tout.
+                </span>
+              </h1>
 
-            <p className="description">
-              Des pièces pensées pour bouger, vivre et
-              affirmer son style.
-            </p>
+              <p className="description">
+                Des pièces pensées pour bouger, vivre et
+                affirmer son style. Des coupes nettes, des
+                matières qui durent, du matin au soir.
+              </p>
+
+              <div className="hero-actions">
+                <a className="hero-bouton" href="#selection">
+                  Découvrir la sélection ↓
+                </a>
+
+                <button
+                  type="button"
+                  className="hero-bouton hero-bouton-secondaire"
+                  onClick={copierCodePromo}
+                >
+                  {codeCopie
+                    ? "Code TRAAC25 copié ✓"
+                    : "−25 % avec TRAAC25"}
+                </button>
+              </div>
+
+              <ul className="hero-atouts">
+                <li>{vetements.length} pièces Homme &amp; Femme</li>
+                <li>
+                  Tailles {TAILLES[0]} à {TAILLES[TAILLES.length - 1]}
+                </li>
+                <li>−25 % sur ta première commande</li>
+              </ul>
+            </div>
+
+            {/* 3 pièces disponibles du catalogue : un clic ouvre l'aperçu */}
+            {vetementsHero.length > 0 && (
+              <div className="hero-visuels">
+                {vetementsHero.map((vetement) => (
+                  <button
+                    key={vetement.id}
+                    type="button"
+                    className="hero-visuel"
+                    onClick={() => ouvrirApercu(vetement)}
+                    aria-label={`Voir ${vetement.nom}`}
+                  >
+                    <img src={vetement.image_url} alt="" />
+                    <span className="hero-prix">
+                      {Number(vetement.prix).toFixed(2)} €
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
 
-          <section className="collection">
+          <section className="collection" id="selection">
             <div className="titre-collection">
               <h2>La sélection</h2>
               <p>{vetementsFiltres.length} pièce(s)</p>

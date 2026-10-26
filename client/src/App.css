@@ -231,17 +231,17 @@ img {
    HERO / INTRODUCTION
 ========================================= */
 
+/* Deux colonnes en flex : le texte à gauche, 3 pièces du catalogue à droite */
 .introduction {
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 570px;
-  padding: 90px 7% 100px;
+  justify-content: space-between;
+  gap: 60px;
+  min-height: 600px;
+  padding: 80px 6.5% 90px;
   overflow: hidden;
   background: var(--vert);
-  text-align: center;
 }
 
 .introduction::before {
@@ -276,24 +276,173 @@ img {
   text-transform: uppercase;
 }
 
-.introduction h1 {
+.hero-texte {
   position: relative;
   z-index: 1;
-  max-width: 1150px;
+  flex: 1 1 52%;
+  min-width: 0;
+  animation: hero-apparition 0.7s ease both;
+}
+
+.introduction h1 {
   margin: 12px 0 25px;
   color: var(--ivoire);
   font-family: "Space Grotesk", "DM Sans", sans-serif;
-  font-size: clamp(48px, 7.5vw, 106px);
+  font-size: clamp(46px, 6vw, 92px);
   font-weight: 700;
   line-height: 0.99;
-  letter-spacing: -5px;
+  letter-spacing: -4px;
+}
+
+.hero-accent {
+  color: var(--noir);
 }
 
 .description {
-  max-width: 530px;
-  margin: 10px 0 0;
-  font-size: clamp(16px, 1.6vw, 21px);
+  max-width: 520px;
+  margin: 0;
+  font-size: clamp(16px, 1.4vw, 19px);
   line-height: 1.7;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+.hero-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 22px;
+  background: var(--noir);
+  color: var(--blanc);
+  border: 1px solid var(--noir);
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.hero-bouton:hover {
+  background: var(--ivoire);
+  color: var(--noir);
+}
+
+.hero-bouton-secondaire {
+  background: transparent;
+  color: var(--noir);
+}
+
+.hero-bouton-secondaire:hover {
+  background: var(--noir);
+  color: var(--blanc);
+}
+
+.hero-bouton:focus-visible,
+.hero-visuel:focus-visible {
+  outline: 2px solid var(--noir);
+  outline-offset: 3px;
+}
+
+.hero-atouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin: 34px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hero-atouts li::before {
+  margin-right: 8px;
+  color: var(--ivoire);
+  content: "✦";
+}
+
+.hero-visuels {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1 1 48%;
+  max-width: 640px;
+  animation: hero-apparition 0.7s 0.15s ease both;
+}
+
+.hero-visuel {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  overflow: hidden;
+  background: #e8e8e0;
+  border: 0;
+  box-shadow: 0 18px 40px rgba(23, 25, 22, 0.18);
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+
+/* La pièce du milieu, plus grande et décalée, crée un effet de mosaïque */
+.hero-visuel:nth-child(2) {
+  flex-grow: 1.3;
+  margin-top: 50px;
+}
+
+.hero-visuel:hover {
+  transform: translateY(-6px);
+}
+
+.hero-visuel img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-prix {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  padding: 6px 9px;
+  background: var(--ivoire);
+  color: var(--noir);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* Petits écrans d'ordinateur : un peu plus de place pour le texte et les boutons */
+@media (max-width: 1200px) {
+  .introduction {
+    gap: 36px;
+  }
+
+  .hero-visuels {
+    flex-basis: 40%;
+  }
+}
+
+@keyframes hero-apparition {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* =========================================
@@ -302,6 +451,8 @@ img {
 
 .collection {
   padding: 90px 6.5%;
+  /* Le bouton « Découvrir la sélection » s'arrête sous l'en-tête collant */
+  scroll-margin-top: 40px;
 }
 
 .titre-collection {
@@ -1254,8 +1405,17 @@ img {
     font-size: 13px;
   }
 
+  /* Tablette et mobile : le texte passe au-dessus des photos */
   .introduction {
-    min-height: 500px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 50px;
+    min-height: 0;
+  }
+
+  .hero-visuels {
+    width: 100%;
+    max-width: 520px;
   }
 
   .introduction h1 {
@@ -1316,8 +1476,20 @@ img {
   }
 
   .introduction {
-    min-height: 430px;
-    padding: 70px 6%;
+    gap: 40px;
+    padding: 60px 6% 70px;
+  }
+
+  .hero-bouton {
+    flex: 1 1 auto;
+  }
+
+  .hero-visuels {
+    gap: 10px;
+  }
+
+  .hero-visuel:nth-child(2) {
+    margin-top: 24px;
   }
 
   .introduction h1 {
